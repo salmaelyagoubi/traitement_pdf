@@ -28,7 +28,16 @@ def traiter_pdf():
                 for page in pdf.pages:
                     if page.extract_text():
                         lines.extend(pdf.pages[pdf.pages.index(page)].extract_text().splitlines())
+            # === Extraction nom complet + ID ===
+            full_name = ""
+            person_id = ""
 
+            for line in lines:
+                match = re.search(r"Mr\s+([A-Z]+ [A-Za-zÀ-ÿ\-']+)\s+\((E\d+)\)", line)
+                if match:
+                    full_name = match[1].strip()
+                    person_id = match[2].strip()
+                    break
             # Heure de début
             first_start = None
             for line in lines:
@@ -104,6 +113,8 @@ def traiter_pdf():
                 response.headers.set("Content-Type", "application/pdf")
                 response.headers.set("Content-Disposition", "attachment", filename="pdf_modifie.pdf")
                 response.headers.set("x-duree", duration_str)  # Ajout d’un header perso avec la durée
+                response.headers.set("X-Nom", full_name)
+                response.headers.set("X-ID", person_id)
             return response
 
         except Exception as e:
