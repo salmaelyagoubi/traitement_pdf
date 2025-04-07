@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>PDF Hour Analyzer</title>
+  <style>
+    body { font-family: Arial; padding: 15px; width: 250px; }
+    button { margin-top: 10px; width: 100%; }
+  </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.14.305/pdf.min.js"></script>
+</head>
+<body>
+  <h3>Analyse ton PDF</h3>
+  <input type="file" id="pdfFile" accept=".pdf" />
+  <button id="analyzeBtn">Analyser</button>
+  <div id="result"></div>
+
+  <script src="popup.js"></script>
+  <div id="hours"></div>
+
+</body>
+</html>

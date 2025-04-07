@@ -1,0 +1,13 @@
+{
+    "manifest_version": 3,
+    "name": "PDF Hour Analyzer",
+    "version": "1.0",
+    "description": "Analyze work hours in a PDF and add a conclusion if over 16h",
+    "permissions": ["activeTab", "scripting", "downloads"],
+    "action": {
+      "default_popup": "popup.html",
+      "default_icon": "icon.png"
+    },
+    "host_permissions": ["<all_urls>"]
+  }
+  
