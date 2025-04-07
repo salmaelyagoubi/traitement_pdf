@@ -1,4 +1,4 @@
-from flask import Flask, request, send_file
+from flask import Flask, request, send_file, make_response, jsonify
 from datetime import datetime
 import pdfplumber
 from PyPDF2 import PdfReader, PdfWriter
@@ -97,7 +97,14 @@ def traiter_pdf():
             with open(output_path, "wb") as f:
                 writer.write(f)
 
-            return send_file(output_path, as_attachment=True, download_name="pdf_modifie.pdf")
+            with open(output_path, "rb") as f:
+                file_data = f.read()
+
+                response = make_response(file_data)
+                response.headers.set("Content-Type", "application/pdf")
+                response.headers.set("Content-Disposition", "attachment", filename="pdf_modifie.pdf")
+                response.headers.set("X-Duree", duration_str)  # Ajout d’un header perso avec la durée
+            return response
 
         except Exception as e:
             return f"Erreur pendant le traitement : {str(e)}", 500
