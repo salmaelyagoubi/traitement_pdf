@@ -103,7 +103,7 @@ def traiter_pdf():
                 response = make_response(file_data)
                 response.headers.set("Content-Type", "application/pdf")
                 response.headers.set("Content-Disposition", "attachment", filename="pdf_modifie.pdf")
-                response.headers.set("X-Duree", duration_str)  # Ajout d’un header perso avec la durée
+                response.headers.set("x-duree", duration_str)  # Ajout d’un header perso avec la durée
             return response
 
         except Exception as e:
