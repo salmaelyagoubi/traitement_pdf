@@ -15,30 +15,29 @@ app = Flask(__name__)
 def traiter_pdf():
     file = request.files['file']
 
-    # Création d’un fichier temporaire
     with tempfile.TemporaryDirectory() as tmpdir:
         input_path = os.path.join(tmpdir, "input.pdf")
         output_path = os.path.join(tmpdir, "modified.pdf")
         file.save(input_path)
 
-        # Traitement du PDF (ta logique ici ⬇)
         try:
             with pdfplumber.open(input_path) as pdf:
                 lines = []
                 for page in pdf.pages:
                     if page.extract_text():
-                        lines.extend(pdf.pages[pdf.pages.index(page)].extract_text().splitlines())
+                        lines.extend(page.extract_text().splitlines())
+
             # === Extraction nom complet + ID ===
             full_name = ""
             person_id = ""
-
             for line in lines:
                 match = re.search(r"Mr\s+([A-Z]+ [A-Za-zÀ-ÿ\-']+)\s+\((E\d+)\)", line)
                 if match:
                     full_name = match[1].strip()
                     person_id = match[2].strip()
                     break
-            # Heure de début
+
+            # === Heure de début ===
             first_start = None
             for line in lines:
                 if "Heure de début de mission" in line:
@@ -49,11 +48,9 @@ def traiter_pdf():
             if not first_start:
                 return "Heure de début non trouvée", 400
 
-            # Heure de fin
+            # === Heure de fin ===
             all_times = []
             for line in lines:
-                if "retour" in line.lower() or "16/02" in line:
-                    continue
                 found = re.findall(r'\b(\d{1,2})[:h](\d{2})\b', line)
                 for h, m in found:
                     all_times.append(datetime.strptime(f"{h}:{m}", "%H:%M"))
@@ -72,18 +69,24 @@ def traiter_pdf():
             end_str = last_time.strftime("%H:%M")
             duration_str = f"{hours}h{minutes:02d}"
 
+            # === Déterminer les AVANTAGES ===
+            avantages = []
+            if first_start.hour < 8 or (first_start.hour == 8 and first_start.minute < 30):
+                avantages.append("Petit déjeuner")
+            if last_time.hour > 13 or (last_time.hour == 13 and last_time.minute > 30):
+                avantages.append("Déjeuner")
+            if last_time.hour >= 20:
+                avantages.append("Dîner")
+            avantage_str = ", ".join(avantages) if avantages else "Aucun"
+
+            # === Texte final à insérer ===
             message = (
                 f"Heure de début : {start_str}\n"
                 f"Heure de fin : {end_str}\n"
                 f"Durée totale de la mission : {duration_str}\n"
+                f"Avantages attribués : {avantage_str}"
             )
 
-            if hours >= 16:
-                message += "La personne a travaillé exceptionnellement longtemps aujourd’hui. Merci pour son implication."
-            else:
-                message += "La personne a accompli sa mission avec implication."
-
-            # Création du texte à insérer
             packet = io.BytesIO()
             can = canvas.Canvas(packet, pagesize=A4)
             can.setFont("Helvetica-Bold", 11)
@@ -94,7 +97,6 @@ def traiter_pdf():
             can.save()
             packet.seek(0)
 
-            # Fusion PDF
             original = PdfReader(input_path)
             overlay = PdfReader(packet)
             writer = PdfWriter()
@@ -112,9 +114,10 @@ def traiter_pdf():
                 response = make_response(file_data)
                 response.headers.set("Content-Type", "application/pdf")
                 response.headers.set("Content-Disposition", "attachment", filename="pdf_modifie.pdf")
-                response.headers.set("x-duree", duration_str)  # Ajout d’un header perso avec la durée
-                response.headers.set("X-nom", full_name)
-                response.headers.set("X-id", person_id)
+                response.headers.set("x-duree", duration_str)
+                response.headers.set("x-nom", full_name)
+                response.headers.set("x-id", person_id)
+                response.headers.set("x-avantages", avantage_str)
             return response
 
         except Exception as e:
