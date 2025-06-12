@@ -122,9 +122,9 @@ def traiter_pdf():
                 response = make_response(file_data)
                 response.headers.set("Content-Type", "application/pdf; charset=utf-8")
                 response.headers.set("Content-Disposition", "attachment", filename="pdf_modifie.pdf")
-                response.headers.set("x-duree", duration_str)
-                response.headers.set("x-nom", full_name)
                 response.headers.set("x-id", person_id)
+                response.headers.set("x-nom", full_name)
+                response.headers.set("x-duree", duration_str)
                 response.headers.set("X-avantages", ", ".join(avantages))
                 response.headers.set("X-date", mission_date)
             return response
