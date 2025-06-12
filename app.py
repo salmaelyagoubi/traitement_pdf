@@ -1,3 +1,4 @@
+
 from flask import Flask, request, send_file, make_response, jsonify
 from datetime import datetime
 import pdfplumber
@@ -112,12 +113,12 @@ def traiter_pdf():
                 file_data = f.read()
 
                 response = make_response(file_data)
-                response.headers.set("Content-Type", "application/pdf")
+                response.headers.set("Content-Type", "application/pdf; charset=utf-8")
                 response.headers.set("Content-Disposition", "attachment", filename="pdf_modifie.pdf")
                 response.headers.set("x-duree", duration_str)
                 response.headers.set("x-nom", full_name)
                 response.headers.set("x-id", person_id)
-                response.headers.set("x-avantages", avantage_str)
+                response.headers.set("X-avantages", avantages.encode("utf-8").decode("utf-8"))
             return response
 
         except Exception as e:
