@@ -125,8 +125,8 @@ def traiter_pdf():
                 response.headers.set("x-id", person_id)
                 response.headers.set("x-nom", full_name)
                 response.headers.set("x-duree", duration_str)
-                response.headers.set("X-avantages", ", ".join(avantages))
-                response.headers.set("X-date", mission_date)
+                response.headers.set("x-avantages", ", ".join(avantages))
+                response.headers.set("x-date", mission_date)
             return response
 
         except Exception as e:
