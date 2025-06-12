@@ -1,6 +1,6 @@
 
 from flask import Flask, request, send_file, make_response, jsonify
-from datetime import datetime
+from datetime import datetime, time
 import pdfplumber
 from PyPDF2 import PdfReader, PdfWriter
 from reportlab.pdfgen import canvas
@@ -78,14 +78,27 @@ def traiter_pdf():
             duration_str = f"{hours}h{minutes:02d}"
 
             # === Déterminer les AVANTAGES ===
+            # Define precise time ranges
+            petit_dej_range = (time(3, 0), time(10, 0))
+            dej_range = (time(11, 50), time(14, 0))
+            diner_range = (time(18, 50), time(23, 59))
+
+            def is_in_range(t, r):
+                return r[0] <= t <= r[1]
+
+            start_time = first_start.time()
+            end_time = last_time.time()
+
             avantages = []
-            if first_start.hour < 8 or (first_start.hour == 8 and first_start.minute < 30):
+            if is_in_range(start_time, petit_dej_range) or is_in_range(end_time, petit_dej_range):
                 avantages.append("Petit déjeuner")
-            if last_time.hour > 13 or (last_time.hour == 13 and last_time.minute > 30):
+            if is_in_range(start_time, dej_range) or is_in_range(end_time, dej_range):
                 avantages.append("Déjeuner")
-            if last_time.hour >= 20:
+            if is_in_range(start_time, diner_range) or is_in_range(end_time, diner_range):
                 avantages.append("Dîner")
+
             avantage_str = ", ".join(avantages) if avantages else "Aucun"
+
 
             # === Texte final à insérer ===
             message = (
