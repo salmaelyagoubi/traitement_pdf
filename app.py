@@ -37,6 +37,13 @@ def traiter_pdf():
                     full_name = match[1].strip()
                     person_id = match[2].strip()
                     break
+            # === EXTRAIRE LA DATE DE MISSION ===
+            mission_date = ""
+            for line in lines:
+                match = re.search(r'Fiche de missions du (\d{2}/\d{2}/\d{4})', line)
+                if match:
+                    mission_date = match.group(1)
+                    break
 
             # === Heure de début ===
             first_start = None
@@ -119,6 +126,7 @@ def traiter_pdf():
                 response.headers.set("x-nom", full_name)
                 response.headers.set("x-id", person_id)
                 response.headers.set("X-avantages", ", ".join(avantages))
+                response.headers.set("X-date", mission_date)
             return response
 
         except Exception as e:
