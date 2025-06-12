@@ -82,8 +82,8 @@ def traiter_pdf():
 
             # === Texte final à insérer ===
             message = (
-                f"Heure de début : {start_str}\n"
                 f"Heure de fin : {end_str}\n"
+                f"Heure de début : {start_str}\n"
                 f"Durée totale de la mission : {duration_str}\n"
                 f"Avantages attribués : {avantage_str}"
             )
